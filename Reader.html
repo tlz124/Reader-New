@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Tracker Reader</title>
+    <link rel="stylesheet" href="Reader.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Focus Tracker Reader</h1>
+            <p class="subtitle">Identify and track words that break your concentration</p>
+        </header>
+
+        <main>
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Your Document</h2>
+                <div class="upload-section">
+                    <label for="pdfUpload" class="btn-upload">
+                        📄 Upload PDF
+                        <input type="file" id="pdfUpload" accept=".pdf" style="display: none;">
+                    </label>
+                    <span id="uploadStatus" class="upload-status"></span>
+                </div>
+                
+                <!-- Page Selection Panel -->
+                <div id="pageSelectionPanel" class="page-selection-panel" style="display: none;">
+                    <div class="page-info">
+                        <strong>PDF loaded:</strong> <span id="pdfFileName"></span>
+                        <br>
+                        <strong>Total pages:</strong> <span id="totalPages"></span>
+                    </div>
+                    <div class="page-selector">
+                        <label>Extract pages:</label>
+                        <div class="page-inputs">
+                            <input type="number" id="pageFrom" min="1" placeholder="From">
+                            <span>to</span>
+                            <input type="number" id="pageTo" min="1" placeholder="To">
+                        </div>
+                        <button id="extractPagesBtn" class="btn-primary">Extract Pages</button>
+                    </div>
+                    <div class="page-help">
+                        💡 Tip: Extract 5-15 pages at a time for best performance
+                    </div>
+                </div>
+                
+                <textarea id="textInput" placeholder="Paste your text here, or upload a PDF above.
+
+As you read, you'll be able to click on words that distract you or break your focus."></textarea>
+                <button id="startReadingBtn" class="btn-primary">Start Reading</button>
+            </div>
+
+            <!-- Reading Section -->
+            <div id="readingSection" class="reading-section" style="display: none;">
+                <div class="reading-header">
+                    <h2>📖 Reading Mode</h2>
+                    <div class="mode-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="markingModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span id="modeLabel" class="mode-label">Marking Mode: OFF</span>
+                    </div>
+                    <button id="showSummaryBtn" class="btn-secondary">
+                        View Removed Words (<span id="removedCount">0</span>)
+                    </button>
+                </div>
+
+                <div class="reading-instructions">
+                    💡 <strong>Tip:</strong> Toggle Marking Mode ON, then click any word that breaks your focus or diverts your attention.
+                </div>
+
+                <div id="readingContent" class="reading-content"></div>
+
+                <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">Processing document...</div>
+                    <div class="loading-progress">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <div id="progressText" class="progress-text">0%</div>
+                    </div>
+                </div>
+
+                <div id="continueBtn" class="continue-btn" style="display: none;">
+                    <button class="btn-primary btn-large">Continue Reading →</button>
+                </div>
+            </div>
+
+            <!-- Floating Control Panel -->
+            <div id="floatingControls" class="floating-controls" style="display: none;">
+                <div class="drag-handle">
+                    <span class="drag-icon">⋮⋮</span>
+                    <h3>Actions</h3>
+                </div>
+                <div class="mode-toggle-float">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="markingModeToggleFloat">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="modeLabelFloat" class="mode-label-float">Marking Mode</span>
+                </div>
+                <button id="removeMarkedBtnFloat" class="btn-primary btn-float">Remove Marked Words</button>
+                <button id="clearMarksBtnFloat" class="btn-danger btn-float">Clear All Marks</button>
+                <button id="notesBtnFloat" class="btn-secondary btn-float">📝 Notes</button>
+                <button id="newDocumentBtnFloat" class="btn-secondary btn-float">New Document</button>
+            </div>
+
+            <!-- Summary Panel -->
+            <div id="summaryPanel" class="summary-panel" style="display: none;">
+                <div class="summary-header">
+                    <h2>🗑️ Removed Words</h2>
+                    <button id="closeSummaryBtn" class="close-btn">✕</button>
+                </div>
+
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMarked">0</div>
+                        <div class="stat-label">Words Removed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="uniqueMarked">0</div>
+                        <div class="stat-label">Unique Words</div>
+                    </div>
+                </div>
+
+                <div class="summary-list-container">
+                    <h3>Removed Words (with context)</h3>
+                    <div id="summaryList" class="summary-list"></div>
+                </div>
+
+                <div class="summary-actions">
+                    <button id="exportBtn" class="btn-primary">Export List</button>
+                    <button id="copyBtn" class="btn-secondary">Copy to Clipboard</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notesModal" class="notes-modal" style="display: none;">
+        <div class="notes-modal-content">
+            <h2>📝 Notes</h2>
+            <textarea id="notesTextarea" placeholder="Write your notes here..."></textarea>
+            <div class="notes-buttons">
+                <button id="saveNotesBtn" class="btn-primary">Save Notes</button>
+                <button id="cancelNotesBtn" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="Reader.js"></script>
+</body>
+</html>
