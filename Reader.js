@@ -168,13 +168,11 @@ class FocusTrackerReader {
         this.closeSummaryBtn.addEventListener('click', () => this.hideSummary());
         
         // Floating control buttons
-        this.removeMarkedBtnFloat = document.getElementById('removeMarkedBtnFloat');
         this.clearMarksBtnFloat = document.getElementById('clearMarksBtnFloat');
-        this.newDocumentBtnFloat = document.getElementById('newDocumentBtnFloat');
         
-        this.removeMarkedBtnFloat.addEventListener('click', () => this.removeMarkedWords());
-        this.clearMarksBtnFloat.addEventListener('click', () => this.clearAllMarks());
-        this.newDocumentBtnFloat.addEventListener('click', () => this.newDocument());
+        if (this.clearMarksBtnFloat) {
+            this.clearMarksBtnFloat.addEventListener('click', () => this.clearAllMarks());
+        }
         
         // Notes button
         this.notesBtnFloat = document.getElementById('notesBtnFloat');
