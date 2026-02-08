@@ -19,9 +19,16 @@ class FocusTrackerReader {
         this.loadedPdf = null;
         this.pdfFileName = '';
         
-        // File System Access API handle for notes
-        this.notesFileHandle = null;
-        this.db = null; // IndexedDB for persisting file handle
+        // File System Access API handles for different note types
+        this.notesFileHandles = {
+            car: null,
+            files: null,
+            passwords: null,
+            investing: null,
+            reader: null
+        };
+        this.currentNoteType = null; // Track which note type is currently being edited
+        this.db = null; // IndexedDB for persisting file handles
         
         this.init();
     }
@@ -60,46 +67,58 @@ class FocusTrackerReader {
     }
     
     async loadFileHandle() {
-        // Try to load the saved file handle from IndexedDB
+        // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        try {
-            const transaction = this.db.transaction(['fileHandles'], 'readonly');
-            const store = transaction.objectStore('fileHandles');
-            const request = store.get('notesFileHandle');
-            
-            request.onsuccess = async (event) => {
-                const handle = event.target.result;
-                if (handle) {
-                    try {
-                        // Verify we still have permission
-                        const permission = await handle.queryPermission({ mode: 'readwrite' });
-                        if (permission === 'granted' || permission === 'prompt') {
-                            this.notesFileHandle = handle;
-                            console.log('File handle loaded from IndexedDB');
+        const noteTypes = ['car', 'files', 'passwords', 'investing', 'reader'];
+        
+        for (const noteType of noteTypes) {
+            try {
+                const transaction = this.db.transaction(['fileHandles'], 'readonly');
+                const store = transaction.objectStore('fileHandles');
+                const request = store.get(`${noteType}NotesFileHandle`);
+                
+                await new Promise((resolve, reject) => {
+                    request.onsuccess = async (event) => {
+                        const handle = event.target.result;
+                        if (handle) {
+                            try {
+                                // Verify we still have permission
+                                const permission = await handle.queryPermission({ mode: 'readwrite' });
+                                if (permission === 'granted' || permission === 'prompt') {
+                                    this.notesFileHandles[noteType] = handle;
+                                    console.log(`${noteType} file handle loaded from IndexedDB`);
+                                }
+                            } catch (error) {
+                                console.log(`Saved ${noteType} file handle is no longer valid`);
+                                this.notesFileHandles[noteType] = null;
+                            }
                         }
-                    } catch (error) {
-                        console.log('Saved file handle is no longer valid');
-                        this.notesFileHandle = null;
-                    }
-                }
-            };
-        } catch (error) {
-            console.error('Error loading file handle:', error);
+                        resolve();
+                    };
+                    
+                    request.onerror = () => {
+                        console.error(`Error loading ${noteType} file handle`);
+                        resolve();
+                    };
+                });
+            } catch (error) {
+                console.error(`Error loading ${noteType} file handle:`, error);
+            }
         }
     }
     
-    async saveFileHandle(handle) {
+    async saveFileHandle(handle, noteType) {
         // Save the file handle to IndexedDB for persistence
         if (!this.db) return;
         
         try {
             const transaction = this.db.transaction(['fileHandles'], 'readwrite');
             const store = transaction.objectStore('fileHandles');
-            store.put(handle, 'notesFileHandle');
-            console.log('File handle saved to IndexedDB');
+            store.put(handle, `${noteType}NotesFileHandle`);
+            console.log(`${noteType} file handle saved to IndexedDB`);
         } catch (error) {
-            console.error('Error saving file handle:', error);
+            console.error(`Error saving ${noteType} file handle:`, error);
         }
     }
     
@@ -174,10 +193,36 @@ class FocusTrackerReader {
             this.clearMarksBtnFloat.addEventListener('click', () => this.clearAllMarks());
         }
         
-        // Notes button
+        // Notes dropdown
         this.notesBtnFloat = document.getElementById('notesBtnFloat');
-        if (this.notesBtnFloat) {
-            this.notesBtnFloat.addEventListener('click', () => this.openNotes());
+        this.notesDropdown = document.getElementById('notesDropdown');
+        
+        if (this.notesBtnFloat && this.notesDropdown) {
+            // Toggle dropdown when Notes button is clicked
+            this.notesBtnFloat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleNotesDropdown();
+            });
+            
+            // Handle dropdown item clicks
+            const dropdownItems = this.notesDropdown.querySelectorAll('.notes-dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const noteType = e.target.getAttribute('data-note-type');
+                    this.openNotes(noteType);
+                    this.hideNotesDropdown();
+                });
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (this.notesDropdown && 
+                    this.notesDropdown.style.display === 'block' &&
+                    !this.notesDropdown.contains(e.target) &&
+                    e.target !== this.notesBtnFloat) {
+                    this.hideNotesDropdown();
+                }
+            });
         }
         
         this.exportBtn.addEventListener('click', () => this.exportList());
@@ -889,25 +934,44 @@ class FocusTrackerReader {
         });
     }
     
-    async openNotes() {
+    async openNotes(noteType) {
         if (!this.notesModal) {
             console.error('Notes modal not found in DOM');
             return;
         }
         
+        // Store which note type we're editing
+        this.currentNoteType = noteType;
+        
+        // Update modal title based on note type
+        const modalTitle = this.notesModal.querySelector('h2');
+        const titles = {
+            car: '🚗 Car Notes',
+            files: '📁 Files Notes',
+            passwords: '🔐 Passwords Notes',
+            investing: '💰 Investing Notes',
+            reader: '📝 Reader Notes'
+        };
+        if (modalTitle) {
+            modalTitle.textContent = titles[noteType] || '📝 Notes';
+        }
+        
         this.notesModal.style.display = 'flex';
         
-        // If we have a file handle, load existing content
-        if (this.notesFileHandle) {
+        // If we have a file handle for this note type, load existing content
+        if (this.notesFileHandles[noteType]) {
             try {
-                const file = await this.notesFileHandle.getFile();
+                const file = await this.notesFileHandles[noteType].getFile();
                 const content = await file.text();
                 this.notesTextarea.value = content;
             } catch (error) {
-                console.error('Error reading notes file:', error);
+                console.error(`Error reading ${noteType} notes file:`, error);
                 // File might have been deleted, reset handle
-                this.notesFileHandle = null;
+                this.notesFileHandles[noteType] = null;
             }
+        } else {
+            // Clear textarea if no existing file
+            this.notesTextarea.value = '';
         }
         
         this.notesTextarea.focus();
@@ -916,6 +980,21 @@ class FocusTrackerReader {
     closeNotes() {
         if (!this.notesModal) return;
         this.notesModal.style.display = 'none';
+    }
+    
+    toggleNotesDropdown() {
+        if (!this.notesDropdown) return;
+        
+        if (this.notesDropdown.style.display === 'none' || this.notesDropdown.style.display === '') {
+            this.notesDropdown.style.display = 'block';
+        } else {
+            this.notesDropdown.style.display = 'none';
+        }
+    }
+    
+    hideNotesDropdown() {
+        if (!this.notesDropdown) return;
+        this.notesDropdown.style.display = 'none';
     }
     
     async saveNotes() {
@@ -940,14 +1019,29 @@ class FocusTrackerReader {
     
     async saveNotesWithFileSystemAPI(content) {
         try {
-            console.log('Starting save process...');
-            console.log('Current file handle:', this.notesFileHandle);
+            const noteType = this.currentNoteType;
+            if (!noteType) {
+                console.error('No note type selected');
+                return;
+            }
+            
+            console.log(`Starting save process for ${noteType} notes...`);
+            console.log('Current file handle:', this.notesFileHandles[noteType]);
+            
+            // File name mapping
+            const fileNames = {
+                car: 'car-notes.txt',
+                files: 'files-notes.txt',
+                passwords: 'passwords-notes.txt',
+                investing: 'investing-notes.txt',
+                reader: 'reading-notes.txt'
+            };
             
             // If we don't have a file handle, ask user to select/create file
-            if (!this.notesFileHandle) {
+            if (!this.notesFileHandles[noteType]) {
                 console.log('No file handle found, showing file picker...');
-                this.notesFileHandle = await window.showSaveFilePicker({
-                    suggestedName: 'reading-notes.txt',
+                this.notesFileHandles[noteType] = await window.showSaveFilePicker({
+                    suggestedName: fileNames[noteType],
                     types: [{
                         description: 'Text Files',
                         accept: {
@@ -956,23 +1050,23 @@ class FocusTrackerReader {
                     }]
                 });
                 
-                console.log('File handle obtained:', this.notesFileHandle);
+                console.log('File handle obtained:', this.notesFileHandles[noteType]);
                 
                 // Save the file handle to IndexedDB for future use
-                await this.saveFileHandle(this.notesFileHandle);
+                await this.saveFileHandle(this.notesFileHandles[noteType], noteType);
                 console.log('File handle saved to IndexedDB');
             } else {
                 console.log('Using existing file handle');
             }
             
             // Check if we have permission to write
-            let permission = await this.notesFileHandle.queryPermission({ mode: 'readwrite' });
+            let permission = await this.notesFileHandles[noteType].queryPermission({ mode: 'readwrite' });
             console.log('Current permission:', permission);
             
             if (permission === 'denied') {
                 console.log('Permission denied, requesting...');
                 // Request permission
-                const newPermission = await this.notesFileHandle.requestPermission({ mode: 'readwrite' });
+                const newPermission = await this.notesFileHandles[noteType].requestPermission({ mode: 'readwrite' });
                 if (newPermission === 'denied') {
                     alert('Permission to write to file was denied. Your notes cannot be saved.');
                     return;
@@ -983,7 +1077,7 @@ class FocusTrackerReader {
             // If permission was prompt, request it
             if (permission === 'prompt') {
                 console.log('Permission prompt, requesting...');
-                const newPermission = await this.notesFileHandle.requestPermission({ mode: 'readwrite' });
+                const newPermission = await this.notesFileHandles[noteType].requestPermission({ mode: 'readwrite' });
                 if (newPermission === 'denied') {
                     alert('Permission to write to file was denied. Your notes cannot be saved.');
                     return;
@@ -996,7 +1090,7 @@ class FocusTrackerReader {
             // Get existing content
             let existingContent = '';
             try {
-                const file = await this.notesFileHandle.getFile();
+                const file = await this.notesFileHandles[noteType].getFile();
                 existingContent = await file.text();
                 console.log('Existing content length:', existingContent.length);
             } catch (error) {
@@ -1016,7 +1110,7 @@ class FocusTrackerReader {
             console.log('Final content length:', finalContent.length);
             
             // Write to file
-            const writable = await this.notesFileHandle.createWritable();
+            const writable = await this.notesFileHandles[noteType].createWritable();
             await writable.write(finalContent);
             await writable.close();
             
@@ -1040,8 +1134,24 @@ class FocusTrackerReader {
     
     async saveNotesWithDownload(content) {
         // Fallback method for browsers that don't support File System Access API
-        // Get existing notes from localStorage
-        let existingNotes = localStorage.getItem('readingNotes') || '';
+        const noteType = this.currentNoteType;
+        if (!noteType) {
+            console.error('No note type selected');
+            return;
+        }
+        
+        // File name mapping
+        const fileNames = {
+            car: 'car-notes.txt',
+            files: 'files-notes.txt',
+            passwords: 'passwords-notes.txt',
+            investing: 'investing-notes.txt',
+            reader: 'reading-notes.txt'
+        };
+        
+        // Get existing notes from localStorage for this note type
+        const storageKey = `${noteType}Notes`;
+        let existingNotes = localStorage.getItem(storageKey) || '';
         
         // Append new notes without timestamp
         if (existingNotes) {
@@ -1051,14 +1161,14 @@ class FocusTrackerReader {
         }
         
         // Save back to localStorage
-        localStorage.setItem('readingNotes', existingNotes);
+        localStorage.setItem(storageKey, existingNotes);
         
         // Download the complete notes file
         const blob = new Blob([existingNotes], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'reading-notes.txt';
+        a.download = fileNames[noteType];
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
