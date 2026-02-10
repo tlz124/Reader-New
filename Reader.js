@@ -24,6 +24,9 @@ class FocusTrackerReader {
             car: null,
             files: null,
             passwords: null,
+            chess: null,
+            business: null,
+            lotiontape: null,
             investing: null,
             reader: null
         };
@@ -70,7 +73,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'investing', 'reader'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'reader'];
         
         for (const noteType of noteTypes) {
             try {
@@ -198,10 +201,17 @@ class FocusTrackerReader {
         this.notesDropdown = document.getElementById('notesDropdown');
         
         if (this.notesBtnFloat && this.notesDropdown) {
-            // Toggle dropdown when Notes button is clicked
+            // Toggle dropdown or open notes depending on whether a type is selected
             this.notesBtnFloat.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.toggleNotesDropdown();
+                
+                // If a note type is already selected, open notes directly
+                if (this.currentNoteType) {
+                    this.openNotes(this.currentNoteType);
+                } else {
+                    // Otherwise show the dropdown to select a type
+                    this.toggleNotesDropdown();
+                }
             });
             
             // Handle dropdown item clicks
@@ -209,8 +219,10 @@ class FocusTrackerReader {
             dropdownItems.forEach(item => {
                 item.addEventListener('click', (e) => {
                     const noteType = e.target.getAttribute('data-note-type');
-                    this.openNotes(noteType);
+                    // Set this as the current note type for the session
+                    this.currentNoteType = noteType;
                     this.hideNotesDropdown();
+                    this.openNotes(noteType);
                 });
             });
             
@@ -940,8 +952,10 @@ class FocusTrackerReader {
             return;
         }
         
-        // Store which note type we're editing
-        this.currentNoteType = noteType;
+        // Store which note type we're editing (if not already set)
+        if (!this.currentNoteType) {
+            this.currentNoteType = noteType;
+        }
         
         // Update modal title based on note type
         const modalTitle = this.notesModal.querySelector('h2');
@@ -949,6 +963,9 @@ class FocusTrackerReader {
             car: '🚗 Car Notes',
             files: '📁 Files Notes',
             passwords: '🔐 Passwords Notes',
+            chess: '♟️ Chess Notes',
+            business: '💼 Business Notes',
+            lotiontape: '🩹 Lotion Tape Notes',
             investing: '💰 Investing Notes',
             reader: '📝 Reader Notes'
         };
@@ -956,29 +973,31 @@ class FocusTrackerReader {
             modalTitle.textContent = titles[noteType] || '📝 Notes';
         }
         
-        this.notesModal.style.display = 'flex';
-        
-        // If we have a file handle for this note type, load existing content
-        if (this.notesFileHandles[noteType]) {
-            try {
-                const file = await this.notesFileHandles[noteType].getFile();
-                const content = await file.text();
-                this.notesTextarea.value = content;
-            } catch (error) {
-                console.error(`Error reading ${noteType} notes file:`, error);
-                // File might have been deleted, reset handle
-                this.notesFileHandles[noteType] = null;
+        // Only load file content if textarea is empty (first time opening in this session)
+        if (!this.notesTextarea.value.trim()) {
+            // If we have a file handle for this note type, load existing content
+            if (this.notesFileHandles[noteType]) {
+                try {
+                    const file = await this.notesFileHandles[noteType].getFile();
+                    const content = await file.text();
+                    this.notesTextarea.value = content;
+                } catch (error) {
+                    console.error(`Error reading ${noteType} notes file:`, error);
+                    // File might have been deleted, reset handle
+                    this.notesFileHandles[noteType] = null;
+                }
             }
-        } else {
-            // Clear textarea if no existing file
-            this.notesTextarea.value = '';
         }
+        // If textarea has content, keep it (don't reload from file)
         
+        this.notesModal.style.display = 'flex';
         this.notesTextarea.focus();
     }
     
     closeNotes() {
         if (!this.notesModal) return;
+        // Just hide the modal, don't clear the textarea
+        // Notes will persist until saved or until switching to a different note type
         this.notesModal.style.display = 'none';
     }
     
@@ -1033,6 +1052,9 @@ class FocusTrackerReader {
                 car: 'car-notes.txt',
                 files: 'files-notes.txt',
                 passwords: 'passwords-notes.txt',
+                chess: 'chess-notes.txt',
+                business: 'business-notes.txt',
+                lotiontape: 'lotion-tape-notes.txt',
                 investing: 'investing-notes.txt',
                 reader: 'reading-notes.txt'
             };
@@ -1116,6 +1138,9 @@ class FocusTrackerReader {
             
             console.log('File written successfully!');
             
+            // Clear the textarea after successful save
+            this.notesTextarea.value = '';
+            
             // Close modal
             this.closeNotes();
             
@@ -1145,6 +1170,9 @@ class FocusTrackerReader {
             car: 'car-notes.txt',
             files: 'files-notes.txt',
             passwords: 'passwords-notes.txt',
+            chess: 'chess-notes.txt',
+            business: 'business-notes.txt',
+            lotiontape: 'lotion-tape-notes.txt',
             investing: 'investing-notes.txt',
             reader: 'reading-notes.txt'
         };
@@ -1173,6 +1201,9 @@ class FocusTrackerReader {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        // Clear the textarea after successful save
+        this.notesTextarea.value = '';
         
         // Close modal
         this.closeNotes();
