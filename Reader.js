@@ -32,6 +32,7 @@ class FocusTrackerReader {
             organicchemistry: null,
             math: null,
             biology: null,
+            '3dprinting': null,
             reader: null
         };
         this.currentNoteType = null; // Track which note type is currently being edited
@@ -77,7 +78,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', 'reader'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'reader'];
         
         for (const noteType of noteTypes) {
             try {
@@ -331,8 +332,12 @@ class FocusTrackerReader {
         const file = event.target.files[0];
         if (!file) return;
         
-        // Check if it's a TXT file
-        if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+        // Check if it's a TXT file (check both MIME type and file extension)
+        const isTxtFile = file.type === 'text/plain' || 
+                          file.type === '' && file.name.toLowerCase().endsWith('.txt') ||
+                          file.name.toLowerCase().endsWith('.txt');
+        
+        if (isTxtFile) {
             this.uploadStatus.textContent = 'Loading text file...';
             this.uploadStatus.className = 'upload-status';
             
@@ -354,8 +359,12 @@ class FocusTrackerReader {
             return;
         }
         
+        // Check if it's a PDF file
+        const isPdfFile = file.type === 'application/pdf' || 
+                          file.name.toLowerCase().endsWith('.pdf');
+        
         // Handle PDF files
-        if (file.type !== 'application/pdf') {
+        if (!isPdfFile) {
             this.uploadStatus.textContent = 'Please upload a PDF or TXT file';
             this.uploadStatus.className = 'upload-status error';
             return;
@@ -999,6 +1008,7 @@ class FocusTrackerReader {
             organicchemistry: '🧪 Organic Chemistry Notes',
             math: '🔢 Math Notes',
             biology: '🧬 Biology Notes',
+            '3dprinting': '🖨️ 3D Printing Notes',
             reader: '📝 Reader Notes'
         };
         if (modalTitle) {
@@ -1092,6 +1102,7 @@ class FocusTrackerReader {
                 organicchemistry: 'organic-chemistry-notes.txt',
                 math: 'math-notes.txt',
                 biology: 'biology-notes.txt',
+                '3dprinting': '3d-printing-notes.txt',
                 reader: 'reading-notes.txt'
             };
             
@@ -1214,6 +1225,7 @@ class FocusTrackerReader {
             organicchemistry: 'organic-chemistry-notes.txt',
             math: 'math-notes.txt',
             biology: 'biology-notes.txt',
+            '3dprinting': '3d-printing-notes.txt',
             reader: 'reading-notes.txt'
         };
         
