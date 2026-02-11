@@ -331,8 +331,32 @@ class FocusTrackerReader {
         const file = event.target.files[0];
         if (!file) return;
         
+        // Check if it's a TXT file
+        if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+            this.uploadStatus.textContent = 'Loading text file...';
+            this.uploadStatus.className = 'upload-status';
+            
+            try {
+                // Read the text file
+                const text = await file.text();
+                
+                // Put the text directly into the textarea
+                this.textInput.value = text;
+                
+                this.uploadStatus.textContent = '✓ Text file loaded successfully';
+                this.uploadStatus.className = 'upload-status';
+                
+            } catch (error) {
+                console.error('Text file loading error:', error);
+                this.uploadStatus.textContent = '✗ Error loading text file';
+                this.uploadStatus.className = 'upload-status error';
+            }
+            return;
+        }
+        
+        // Handle PDF files
         if (file.type !== 'application/pdf') {
-            this.uploadStatus.textContent = 'Please upload a PDF file';
+            this.uploadStatus.textContent = 'Please upload a PDF or TXT file';
             this.uploadStatus.className = 'upload-status error';
             return;
         }
