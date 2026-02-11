@@ -28,6 +28,10 @@ class FocusTrackerReader {
             business: null,
             lotiontape: null,
             investing: null,
+            blender: null,
+            organicchemistry: null,
+            math: null,
+            biology: null,
             reader: null
         };
         this.currentNoteType = null; // Track which note type is currently being edited
@@ -73,7 +77,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'reader'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', 'reader'];
         
         for (const noteType of noteTypes) {
             try {
@@ -967,6 +971,10 @@ class FocusTrackerReader {
             business: '💼 Business Notes',
             lotiontape: '🩹 Lotion Tape Notes',
             investing: '💰 Investing Notes',
+            blender: '🎨 Blender Notes',
+            organicchemistry: '🧪 Organic Chemistry Notes',
+            math: '🔢 Math Notes',
+            biology: '🧬 Biology Notes',
             reader: '📝 Reader Notes'
         };
         if (modalTitle) {
@@ -1056,6 +1064,10 @@ class FocusTrackerReader {
                 business: 'business-notes.txt',
                 lotiontape: 'lotion-tape-notes.txt',
                 investing: 'investing-notes.txt',
+                blender: 'blender-notes.txt',
+                organicchemistry: 'organic-chemistry-notes.txt',
+                math: 'math-notes.txt',
+                biology: 'biology-notes.txt',
                 reader: 'reading-notes.txt'
             };
             
@@ -1174,6 +1186,10 @@ class FocusTrackerReader {
             business: 'business-notes.txt',
             lotiontape: 'lotion-tape-notes.txt',
             investing: 'investing-notes.txt',
+            blender: 'blender-notes.txt',
+            organicchemistry: 'organic-chemistry-notes.txt',
+            math: 'math-notes.txt',
+            biology: 'biology-notes.txt',
             reader: 'reading-notes.txt'
         };
         
