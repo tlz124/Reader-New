@@ -33,7 +33,11 @@ class FocusTrackerReader {
             math: null,
             biology: null,
             '3dprinting': null,
-            reader: null
+            python: null,
+            cprogramming: null,
+            html: null,
+            css: null,
+            javascript: null
         };
         this.currentNoteType = null; // Track which note type is currently being edited
         this.db = null; // IndexedDB for persisting file handles
@@ -78,7 +82,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'reader'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'html', 'css', 'javascript'];
         
         for (const noteType of noteTypes) {
             try {
@@ -1009,7 +1013,11 @@ class FocusTrackerReader {
             math: '🔢 Math Notes',
             biology: '🧬 Biology Notes',
             '3dprinting': '🖨️ 3D Printing Notes',
-            reader: '📝 Reader Notes'
+            python: '🐍 Python Notes',
+            cprogramming: '⚙️ C Programming Notes',
+            html: '🌐 HTML Notes',
+            css: '🎨 CSS Notes',
+            javascript: '⚡ JavaScript Notes'
         };
         if (modalTitle) {
             modalTitle.textContent = titles[noteType] || '📝 Notes';
@@ -1103,7 +1111,11 @@ class FocusTrackerReader {
                 math: 'math-notes.txt',
                 biology: 'biology-notes.txt',
                 '3dprinting': '3d-printing-notes.txt',
-                reader: 'reading-notes.txt'
+                python: 'python-notes.txt',
+                cprogramming: 'c-programming-notes.txt',
+                html: 'html-notes.txt',
+                css: 'css-notes.txt',
+                javascript: 'javascript-notes.txt'
             };
             
             // If we don't have a file handle, ask user to select/create file
@@ -1226,7 +1238,11 @@ class FocusTrackerReader {
             math: 'math-notes.txt',
             biology: 'biology-notes.txt',
             '3dprinting': '3d-printing-notes.txt',
-            reader: 'reading-notes.txt'
+            python: 'python-notes.txt',
+            cprogramming: 'c-programming-notes.txt',
+            html: 'html-notes.txt',
+            css: 'css-notes.txt',
+            javascript: 'javascript-notes.txt'
         };
         
         // Get existing notes from localStorage for this note type
