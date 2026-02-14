@@ -35,9 +35,13 @@ class FocusTrackerReader {
             '3dprinting': null,
             python: null,
             cprogramming: null,
+            cppprogramming: null,
             html: null,
             css: null,
-            javascript: null
+            javascript: null,
+            apartmentmaintenance: null,
+            leticiaclass: null,
+            leticiahealth: null
         };
         this.currentNoteType = null; // Track which note type is currently being edited
         this.db = null; // IndexedDB for persisting file handles
@@ -82,7 +86,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'html', 'css', 'javascript'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'cppprogramming', 'html', 'css', 'javascript', 'apartmentmaintenance', 'leticiaclass', 'leticiahealth'];
         
         for (const noteType of noteTypes) {
             try {
@@ -1015,9 +1019,13 @@ class FocusTrackerReader {
             '3dprinting': '🖨️ 3D Printing Notes',
             python: '🐍 Python Notes',
             cprogramming: '⚙️ C Programming Notes',
+            cppprogramming: '⚙️ C++ Programming Notes',
             html: '🌐 HTML Notes',
             css: '🎨 CSS Notes',
-            javascript: '⚡ JavaScript Notes'
+            javascript: '⚡ JavaScript Notes',
+            apartmentmaintenance: '🏠 Apartment Maintenance Notes',
+            leticiaclass: '📚 Leticia\'s Class Notes',
+            leticiahealth: '💊 Leticia\'s Health Notes'
         };
         if (modalTitle) {
             modalTitle.textContent = titles[noteType] || '📝 Notes';
@@ -1113,9 +1121,13 @@ class FocusTrackerReader {
                 '3dprinting': '3d-printing-notes.txt',
                 python: 'python-notes.txt',
                 cprogramming: 'c-programming-notes.txt',
+                cppprogramming: 'cpp-programming-notes.txt',
                 html: 'html-notes.txt',
                 css: 'css-notes.txt',
-                javascript: 'javascript-notes.txt'
+                javascript: 'javascript-notes.txt',
+                apartmentmaintenance: 'apartment-maintenance-notes.txt',
+                leticiaclass: 'leticia-class-notes.txt',
+                leticiahealth: 'leticia-health-notes.txt'
             };
             
             // If we don't have a file handle, ask user to select/create file
@@ -1240,9 +1252,13 @@ class FocusTrackerReader {
             '3dprinting': '3d-printing-notes.txt',
             python: 'python-notes.txt',
             cprogramming: 'c-programming-notes.txt',
+            cppprogramming: 'cpp-programming-notes.txt',
             html: 'html-notes.txt',
             css: 'css-notes.txt',
-            javascript: 'javascript-notes.txt'
+            javascript: 'javascript-notes.txt',
+            apartmentmaintenance: 'apartment-maintenance-notes.txt',
+            leticiaclass: 'leticia-class-notes.txt',
+            leticiahealth: 'leticia-health-notes.txt'
         };
         
         // Get existing notes from localStorage for this note type
