@@ -36,9 +36,7 @@ class FocusTrackerReader {
             python: null,
             cprogramming: null,
             cppprogramming: null,
-            html: null,
-            css: null,
-            javascript: null,
+            website: null,
             apartmentmaintenance: null,
             leticiaclass: null,
             leticiahealth: null
@@ -86,7 +84,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'cppprogramming', 'html', 'css', 'javascript', 'apartmentmaintenance', 'leticiaclass', 'leticiahealth'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'cppprogramming', 'website', 'apartmentmaintenance', 'leticiaclass', 'leticiahealth'];
         
         for (const noteType of noteTypes) {
             try {
@@ -1020,9 +1018,7 @@ class FocusTrackerReader {
             python: '🐍 Python Notes',
             cprogramming: '⚙️ C Programming Notes',
             cppprogramming: '⚙️ C++ Programming Notes',
-            html: '🌐 HTML Notes',
-            css: '🎨 CSS Notes',
-            javascript: '⚡ JavaScript Notes',
+            website: '🌐 Website Notes',
             apartmentmaintenance: '🏠 Apartment Maintenance Notes',
             leticiaclass: '📚 Leticia\'s Class Notes',
             leticiahealth: '💊 Leticia\'s Health Notes'
@@ -1122,9 +1118,7 @@ class FocusTrackerReader {
                 python: 'python-notes.txt',
                 cprogramming: 'c-programming-notes.txt',
                 cppprogramming: 'cpp-programming-notes.txt',
-                html: 'html-notes.txt',
-                css: 'css-notes.txt',
-                javascript: 'javascript-notes.txt',
+                website: 'website-notes.txt',
                 apartmentmaintenance: 'apartment-maintenance-notes.txt',
                 leticiaclass: 'leticia-class-notes.txt',
                 leticiahealth: 'leticia-health-notes.txt'
@@ -1253,9 +1247,7 @@ class FocusTrackerReader {
             python: 'python-notes.txt',
             cprogramming: 'c-programming-notes.txt',
             cppprogramming: 'cpp-programming-notes.txt',
-            html: 'html-notes.txt',
-            css: 'css-notes.txt',
-            javascript: 'javascript-notes.txt',
+            website: 'website-notes.txt',
             apartmentmaintenance: 'apartment-maintenance-notes.txt',
             leticiaclass: 'leticia-class-notes.txt',
             leticiahealth: 'leticia-health-notes.txt'
