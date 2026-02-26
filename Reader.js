@@ -29,6 +29,8 @@ class FocusTrackerReader {
             lotiontape: null,
             investing: null,
             blender: null,
+            inkscape: null,
+            azure: null,
             organicchemistry: null,
             math: null,
             biology: null,
@@ -84,7 +86,7 @@ class FocusTrackerReader {
         // Try to load the saved file handles from IndexedDB
         if (!this.db) return;
         
-        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'cppprogramming', 'website', 'apartmentmaintenance', 'leticiaclass', 'leticiahealth'];
+        const noteTypes = ['car', 'files', 'passwords', 'chess', 'business', 'lotiontape', 'investing', 'blender', 'inkscape', 'azure', 'organicchemistry', 'math', 'biology', '3dprinting', 'python', 'cprogramming', 'cppprogramming', 'website', 'apartmentmaintenance', 'leticiaclass', 'leticiahealth'];
         
         for (const noteType of noteTypes) {
             try {
@@ -1011,6 +1013,8 @@ class FocusTrackerReader {
             lotiontape: '🩹 Lotion Tape Notes',
             investing: '💰 Investing Notes',
             blender: '🎨 Blender Notes',
+            inkscape: '🖊️ Inkscape Notes',
+            azure: '☁️ Azure Notes',
             organicchemistry: '🧪 Organic Chemistry Notes',
             math: '🔢 Math Notes',
             biology: '🧬 Biology Notes',
@@ -1111,6 +1115,8 @@ class FocusTrackerReader {
                 lotiontape: 'lotion-tape-notes.txt',
                 investing: 'investing-notes.txt',
                 blender: 'blender-notes.txt',
+                inkscape: 'inkscape-notes.txt',
+                azure: 'azure-notes.txt',
                 organicchemistry: 'organic-chemistry-notes.txt',
                 math: 'math-notes.txt',
                 biology: 'biology-notes.txt',
@@ -1240,6 +1246,8 @@ class FocusTrackerReader {
             lotiontape: 'lotion-tape-notes.txt',
             investing: 'investing-notes.txt',
             blender: 'blender-notes.txt',
+            inkscape: 'inkscape-notes.txt',
+            azure: 'azure-notes.txt',
             organicchemistry: 'organic-chemistry-notes.txt',
             math: 'math-notes.txt',
             biology: 'biology-notes.txt',
@@ -1324,3 +1332,10 @@ class FocusTrackerReader {
 document.addEventListener('DOMContentLoaded', () => {
     new FocusTrackerReader();
 });
+
+
+
+
+
+
+
